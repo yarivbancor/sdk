@@ -45,27 +45,22 @@ describe('Path finder tests', () => {
             ]);
 
         const spyGetConverterBlockchainId = jest
-            .spyOn(genPath, 'getConverterBlockchainId')
+            .spyOn(ethereumFunctions, 'getConverterBlockchainId')
             .mockResolvedValueOnce('0xd3ec78814966Ca1Eb4c923aF4Da86BF7e6c743bA')
             .mockResolvedValueOnce('0x89f26Fff3F690B19057e6bEb7a82C5c29ADfe20B');
 
         const spyGetReserves = jest
-            .spyOn(genPath, 'getReserves')
+            .spyOn(ethereumFunctions, 'getReserves')
             .mockImplementation(() => Promise.resolve({ reserves: {} }));
 
         const spyGetReserveCount = jest
-            .spyOn(genPath, 'getReserveCount')
+            .spyOn(ethereumFunctions, 'getReservesCount')
             .mockResolvedValueOnce('2')
             .mockResolvedValueOnce('2');
 
-        const resToken = {
-            blockchainType: 'ethereum' as genPath.BlockchainType,
-            blockchainId: '0x1F573D6Fb3F13d689FF844B4cE37794d79a7FF1C'
-        };
-
         const spyGetReserveToken = jest
-            .spyOn(genPath, 'getReserveToken')
-            .mockImplementation(() => Promise.resolve(resToken));
+            .spyOn(ethereumFunctions, 'getConnectorBlokchainIdByPosition')
+            .mockImplementation(() => Promise.resolve('0x1F573D6Fb3F13d689FF844B4cE37794d79a7FF1C'));
 
         const response = await sdk.generatePath({
             blockchainType: 'ethereum',
@@ -107,13 +102,20 @@ describe('Path finder tests', () => {
             .mockResolvedValueOnce({ BNTKRM: 'bancorc11112' });
 
         const spyGetReserves = jest
-            .spyOn(genPath, 'getReserves')
+            .spyOn(eosFunctions, 'getReserves')
+            .mockImplementation(() => Promise.resolve({ reserves: []}));
+
+        const spyGetEthReserves = jest
+            .spyOn(ethereumFunctions, 'getReserves')
             .mockImplementation(() => Promise.resolve({ reserves: {} }));
 
         const spyGetReserveCount = jest
-            .spyOn(genPath, 'getReserveCount')
-            .mockResolvedValueOnce('2')
+            .spyOn(ethereumFunctions, 'getReservesCount')
             .mockResolvedValueOnce('2');
+
+        const spyGetEosReserveCount = jest
+            .spyOn(eosFunctions, 'getReservesCount')
+            .mockResolvedValueOnce(2);
 
         const resToken1 = {
             blockchainType: 'ethereum' as genPath.BlockchainType,
@@ -159,9 +161,44 @@ describe('Path finder tests', () => {
         expect(response.paths).toEqual(expectedResult);
         expect(spyGetSmartTokens).toHaveBeenCalledTimes(1);
         expect(spyGetReserves).toHaveBeenCalled();
+        expect(spyGetEthReserves).toHaveBeenCalled();
         expect(spyGetEthereumConverterBlockchainId).toHaveBeenCalledTimes(1);
         expect(spyGetEOSereumConverterBlockchainId).toHaveBeenCalledTimes(1);
-        expect(spyGetReserveCount).toHaveBeenCalledTimes(2);
+        expect(spyGetReserveCount).toHaveBeenCalledTimes(1);
+        expect(spyGetEosReserveCount).toHaveBeenCalledTimes(1);
+        expect(spyGetReserveToken).toHaveBeenCalledTimes(2);
+    });
+
+    it('EOS smart token to bnt path', async () => {
+        const spyGetReserveToken = jest
+            .spyOn(genPath, 'getPathToAnchorByBlockchainId')
+            .mockImplementationOnce(() => Promise.resolve([{ BNT: 'bntbntbntbnt' }]))
+            .mockImplementationOnce(() => Promise.resolve([
+                { BNTOCT: 'bancorr11132' },
+                { BNTOCT: 'bancorc11132' },
+                { OCT: 'octtothemoon' },
+                { BNTOCT: 'bancorc11132' },
+                { BNT: 'bntbntbntbnt' }
+            ]));
+
+        const result = {
+            paths: [
+                {
+                    type: 'eos',
+                    path: [
+                        { BNT: 'bntbntbntbnt' },
+                        { BNTOCT: 'bancorc11132' },
+                        { OCT: 'octtothemoon' },
+                        { BNTOCT: 'bancorc11132' },
+                        { BNTOCT: 'bancorr11132' }]
+                }]
+        };
+
+        const response = await sdk.generatePath(
+            { blockchainId: 'bntbntbntbnt', blockchainType: 'eos', symbol: 'BNT' },
+            { blockchainId: 'bancorr11132', symbol: 'BNTOCT', blockchainType: 'eos' });
+
+        expect(response).toEqual(result);
         expect(spyGetReserveToken).toHaveBeenCalledTimes(2);
     });
 });

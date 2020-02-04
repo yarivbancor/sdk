@@ -11,8 +11,6 @@ import { BancorConverterRegistry } from './contracts/BancorConverterRegistry';
 import { SmartToken } from './contracts/SmartToken';
 import { ERC20Token } from './contracts/ERC20Token';
 
-const ETHBlockchainId = '0xc0829421c1d260bd3cb3e0f06cfe2d52db2ce315';
-const BNTBlockchainId = '0x1F573D6Fb3F13d689FF844B4cE37794d79a7FF1C';
 let web3;
 let bancorConverter = BancorConverter;
 let contractRegistry = ContractRegistry;
@@ -26,9 +24,13 @@ export async function init(ethereumNodeUrl, ethereumContractRegistryAddress = '0
     registry = new web3.eth.Contract(registryAbi, registryBlockchainId);
 }
 
-export const getAmountInTokenWei = async (token: string, amount: string, web3) => {
-    const tokenContract = new web3.eth.Contract(ERC20Token, token);
-    const decimals = await tokenContract.methods.decimals().call();
+export const getTokenDecimals = async tokenBlockchainId => {
+    const token = new web3.eth.Contract(ERC20Token, tokenBlockchainId);
+    return await token.methods.decimals().call();
+};
+
+export const getAmountInTokenWei = async (token: string, amount: string) => {
+    const decimals = await getTokenDecimals(token);
     return toWei(amount, decimals);
 };
 
@@ -38,13 +40,8 @@ export const getConversionReturn = async (converterPair: ConversionPathStep, amo
     return returnAmount;
 };
 
-export const getTokenDecimals = async tokenBlockchainId => {
-    const token = new web3.eth.Contract(ERC20Token, tokenBlockchainId);
-    return await token.methods.decimals().call();
-};
-
 export async function getPathStepRate(converterPair: ConversionPathStep, amount: string) {
-    let amountInTokenWei = await getAmountInTokenWei((converterPair.fromToken as string), amount, web3);
+    let amountInTokenWei = await getAmountInTokenWei((converterPair.fromToken as string), amount);
     const tokenBlockchainId = converterPair.toToken;
     const tokenDecimals = await getTokenDecimals(tokenBlockchainId);
     try {
@@ -60,27 +57,10 @@ export async function getPathStepRate(converterPair: ConversionPathStep, amount:
     return fromWei(amountInTokenWei, tokenDecimals);
 }
 
-export async function getRegistry() {
-    const contractRegistryContract = new web3.eth.Contract(contractRegistry, '0x52Ae12ABe5D8BD778BD5397F99cA900624CfADD4');
-    const registryBlockchainId = await contractRegistryContract.methods.addressOf(Web3.utils.asciiToHex('BancorConverterRegistry')).call();
-    return new web3.eth.Contract(registryAbi, registryBlockchainId);
-}
-
 export const getConverterBlockchainId = async blockchainId => {
     const tokenContract = new web3.eth.Contract(SmartToken, blockchainId);
     return await tokenContract.methods.owner().call();
 };
-
-export function getSourceAndTargetTokens(srcToken: string, trgToken: string) {
-    const isSourceETH = (srcToken || BNTBlockchainId).toLocaleLowerCase() == ETHBlockchainId.toLocaleLowerCase();
-    const sourceToken = isSourceETH ? BNTBlockchainId : (srcToken || BNTBlockchainId);
-    const targetToken = trgToken == ETHBlockchainId ? BNTBlockchainId : (trgToken || BNTBlockchainId);
-
-    return {
-        srcToken: sourceToken,
-        trgToken: targetToken
-    };
-}
 
 export async function getReserves(converterBlockchainId) {
     const reserves = new web3.eth.Contract(bancorConverter, converterBlockchainId);
@@ -91,18 +71,18 @@ export async function getReservesCount(reserves) {
     return await getTokenCount(reserves, 'connectorTokenCount');
 }
 
+export const getConnectorBlokchainIdByPosition = async (converterContract, i) => {
+    return await converterContract.methods.connectorTokens(i).call();
+};
+
 export async function getReserveBlockchainId(converter, position) {
-    const blockchainId = await converter.methods.connectorTokens(position).call();
+    const blockchainId = await getConnectorBlokchainIdByPosition(converter, position);
     const returnValue: Token = {
         blockchainType: 'ethereum',
         blockchainId
     };
 
     return returnValue;
-}
-
-export async function getConverterSmartToken(converter) {
-    return await converter.methods.token().call();
 }
 
 async function getTokenCount(converter: any, funcName: string) {
@@ -120,7 +100,7 @@ async function getTokenCount(converter: any, funcName: string) {
 }
 
 export async function getReserveToken(converterContract, i) {
-    const blockchainId = await converterContract.methods.connectorTokens(i).call();
+    const blockchainId = await getConnectorBlokchainIdByPosition(converterContract, i);
     const token: Token = {
         blockchainType: 'ethereum',
         blockchainId

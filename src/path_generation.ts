@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { getConverterBlockchainId as getEosConverterBlockchainId, getReserveBlockchainId as getEosReserveBlockchainId, getReserves as getEOSReserves, getReservesCount as getEOSReservesCount, isMultiConverter } from './blockchains/eos';
-import { getReserves as getEthReserves, getConverterBlockchainId as getEthConverterBlockchainId, getConverterSmartToken as getEthConverterSmartToken, getReserveBlockchainId as getEthereumReserveBlockchainId, getReservesCount as getEthReservesCount, getSmartTokens } from './blockchains/ethereum';
+import { getReserves as getEthReserves, getConverterBlockchainId as getEthConverterBlockchainId, getReserveBlockchainId as getEthereumReserveBlockchainId, getReservesCount as getEthReservesCount, getSmartTokens } from './blockchains/ethereum';
 
 export type BlockchainType = 'ethereum' | 'eos';
 
@@ -101,10 +101,10 @@ export const getReserveToken = async (token, index, blockchainType: BlockchainTy
     return await getEosReserveBlockchainId(token, index);
 };
 
-export async function getConverterToken(blockchainId, connector, blockchainType: BlockchainType) {
-    if (blockchainType == 'ethereum') return await getEthConverterSmartToken(connector);
-    return blockchainId;
-}
+// export async function getConverterToken(blockchainId, connector, blockchainType: BlockchainType) {
+//     if (blockchainType == 'ethereum') return await getEthConverterSmartToken(connector);
+//     return blockchainId;
+// }
 
 export async function generatePathByBlockchainIds(sourceToken: Token, targetToken: Token) {
     const pathObjects: ConversionPaths = { paths: []};
@@ -135,20 +135,7 @@ function getPath(from: Token, to: Token) {
     return path;
 }
 
-export async function getConversionPath(from: Token, to: Token) {
-    const blockchainType = from ? from.blockchainType : to.blockchainType;
-
-    const path = getPath(from, to);
-    return findPath(path, blockchainType);
-}
-
-export async function findPath(pathObject: ConversionPathsTokens, blockchainType: BlockchainType) {
-    const from = await getPathToAnchorByBlockchainId({ ...pathObject.from }, anchorTokens[blockchainType]);
-    const to = await getPathToAnchorByBlockchainId({ ...pathObject.to }, anchorTokens[blockchainType]);
-    return getShortestPath(from, to);
-}
-
-export async function getPathToAnchorByBlockchainId(token: Token, anchorToken: Token) {
+export const getPathToAnchorByBlockchainId = async (token: Token, anchorToken: Token) => {
     if (isAnchorToken(token))
         return [getTokenBlockchainId(token)];
 
@@ -170,6 +157,19 @@ export async function getPathToAnchorByBlockchainId(token: Token, anchorToken: T
         }
     }
     return response;
+};
+
+export const findPath = async (pathObject: ConversionPathsTokens, blockchainType: BlockchainType) => {
+    const from = await getPathToAnchorByBlockchainId({ ...pathObject.from }, anchorTokens[blockchainType]);
+    const to = await getPathToAnchorByBlockchainId({ ...pathObject.to }, anchorTokens[blockchainType]);
+    return getShortestPath(from, to);
+};
+
+export async function getConversionPath(from: Token, to: Token) {
+    const blockchainType = from ? from.blockchainType : to.blockchainType;
+
+    const path = getPath(from, to);
+    return findPath(path, blockchainType);
 }
 
 function getShortestPath(sourcePath, targetPath) {

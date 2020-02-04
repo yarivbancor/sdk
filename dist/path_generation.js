@@ -143,20 +143,10 @@ exports.getReserveToken = function (token, index, blockchainType) { return __awa
         }
     });
 }); };
-function getConverterToken(blockchainId, connector, blockchainType) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    if (!(blockchainType == 'ethereum')) return [3 /*break*/, 2];
-                    return [4 /*yield*/, ethereum_1.getConverterSmartToken(connector)];
-                case 1: return [2 /*return*/, _a.sent()];
-                case 2: return [2 /*return*/, blockchainId];
-            }
-        });
-    });
-}
-exports.getConverterToken = getConverterToken;
+// export async function getConverterToken(blockchainId, connector, blockchainType: BlockchainType) {
+//     if (blockchainType == 'ethereum') return await getEthConverterSmartToken(connector);
+//     return blockchainId;
+// }
 function generatePathByBlockchainIds(sourceToken, targetToken) {
     return __awaiter(this, void 0, void 0, function () {
         var pathObjects, _a, _b, _c, _d, _e, _f, _g, _h, _j;
@@ -201,94 +191,88 @@ function getPath(from, to) {
         path.from = __assign({}, anchorTokens[blockchainType]);
     return path;
 }
+exports.getPathToAnchorByBlockchainId = function (token, anchorToken) { return __awaiter(void 0, void 0, void 0, function () {
+    var smartTokens, _a, isMulti, response, _i, smartTokens_1, smartToken, blockchainId, converterBlockchainId, reserves, reservesCount, i, reserveToken, path;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                if (isAnchorToken(token))
+                    return [2 /*return*/, [getTokenBlockchainId(token)]];
+                if (!(token.blockchainType == 'eos')) return [3 /*break*/, 1];
+                _a = [token.blockchainId];
+                return [3 /*break*/, 3];
+            case 1: return [4 /*yield*/, ethereum_1.getSmartTokens(token)];
+            case 2:
+                _a = _b.sent();
+                _b.label = 3;
+            case 3:
+                smartTokens = _a;
+                isMulti = token.blockchainType == 'eos' ? eos_1.isMultiConverter(token.blockchainId) : false;
+                response = [];
+                _i = 0, smartTokens_1 = smartTokens;
+                _b.label = 4;
+            case 4:
+                if (!(_i < smartTokens_1.length)) return [3 /*break*/, 13];
+                smartToken = smartTokens_1[_i];
+                return [4 /*yield*/, exports.getConverterBlockchainId(token.blockchainType == 'ethereum' ? { blockchainType: token.blockchainType, blockchainId: smartToken } : token)];
+            case 5:
+                blockchainId = _b.sent();
+                converterBlockchainId = token.blockchainType == 'ethereum' ? blockchainId : Object.values(blockchainId)[0];
+                return [4 /*yield*/, exports.getReserves(converterBlockchainId, token.blockchainType, token.symbol, isMulti)];
+            case 6:
+                reserves = (_b.sent()).reserves;
+                return [4 /*yield*/, exports.getReserveCount(reserves, token.blockchainType)];
+            case 7:
+                reservesCount = _b.sent();
+                i = 0;
+                _b.label = 8;
+            case 8:
+                if (!(i < reservesCount)) return [3 /*break*/, 12];
+                return [4 /*yield*/, exports.getReserveToken(reserves, i, token.blockchainType)];
+            case 9:
+                reserveToken = _b.sent();
+                if (!!isReserveToken(reserveToken, token)) return [3 /*break*/, 11];
+                return [4 /*yield*/, exports.getPathToAnchorByBlockchainId(reserveToken, anchorToken)];
+            case 10:
+                path = _b.sent();
+                if (path.length > 0)
+                    return [2 /*return*/, __spreadArrays([getTokenBlockchainId(token), token.blockchainType == 'eos' ? blockchainId : smartToken], path)];
+                _b.label = 11;
+            case 11:
+                i++;
+                return [3 /*break*/, 8];
+            case 12:
+                _i++;
+                return [3 /*break*/, 4];
+            case 13: return [2 /*return*/, response];
+        }
+    });
+}); };
+exports.findPath = function (pathObject, blockchainType) { return __awaiter(void 0, void 0, void 0, function () {
+    var from, to;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, exports.getPathToAnchorByBlockchainId(__assign({}, pathObject.from), anchorTokens[blockchainType])];
+            case 1:
+                from = _a.sent();
+                return [4 /*yield*/, exports.getPathToAnchorByBlockchainId(__assign({}, pathObject.to), anchorTokens[blockchainType])];
+            case 2:
+                to = _a.sent();
+                return [2 /*return*/, getShortestPath(from, to)];
+        }
+    });
+}); };
 function getConversionPath(from, to) {
     return __awaiter(this, void 0, void 0, function () {
         var blockchainType, path;
         return __generator(this, function (_a) {
             blockchainType = from ? from.blockchainType : to.blockchainType;
             path = getPath(from, to);
-            return [2 /*return*/, findPath(path, blockchainType)];
+            return [2 /*return*/, exports.findPath(path, blockchainType)];
         });
     });
 }
 exports.getConversionPath = getConversionPath;
-function findPath(pathObject, blockchainType) {
-    return __awaiter(this, void 0, void 0, function () {
-        var from, to;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, getPathToAnchorByBlockchainId(__assign({}, pathObject.from), anchorTokens[blockchainType])];
-                case 1:
-                    from = _a.sent();
-                    return [4 /*yield*/, getPathToAnchorByBlockchainId(__assign({}, pathObject.to), anchorTokens[blockchainType])];
-                case 2:
-                    to = _a.sent();
-                    return [2 /*return*/, getShortestPath(from, to)];
-            }
-        });
-    });
-}
-exports.findPath = findPath;
-function getPathToAnchorByBlockchainId(token, anchorToken) {
-    return __awaiter(this, void 0, void 0, function () {
-        var smartTokens, _a, isMulti, response, _i, smartTokens_1, smartToken, blockchainId, converterBlockchainId, reserves, reservesCount, i, reserveToken, path;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0:
-                    if (isAnchorToken(token))
-                        return [2 /*return*/, [getTokenBlockchainId(token)]];
-                    if (!(token.blockchainType == 'eos')) return [3 /*break*/, 1];
-                    _a = [token.blockchainId];
-                    return [3 /*break*/, 3];
-                case 1: return [4 /*yield*/, ethereum_1.getSmartTokens(token)];
-                case 2:
-                    _a = _b.sent();
-                    _b.label = 3;
-                case 3:
-                    smartTokens = _a;
-                    isMulti = token.blockchainType == 'eos' ? eos_1.getIsMultiConverter(token.blockchainId) : false;
-                    response = [];
-                    _i = 0, smartTokens_1 = smartTokens;
-                    _b.label = 4;
-                case 4:
-                    if (!(_i < smartTokens_1.length)) return [3 /*break*/, 13];
-                    smartToken = smartTokens_1[_i];
-                    return [4 /*yield*/, exports.getConverterBlockchainId(token.blockchainType == 'ethereum' ? { blockchainType: token.blockchainType, blockchainId: smartToken } : token)];
-                case 5:
-                    blockchainId = _b.sent();
-                    converterBlockchainId = token.blockchainType == 'ethereum' ? blockchainId : Object.values(blockchainId)[0];
-                    return [4 /*yield*/, exports.getReserves(converterBlockchainId, token.blockchainType, token.symbol, isMulti)];
-                case 6:
-                    reserves = (_b.sent()).reserves;
-                    return [4 /*yield*/, exports.getReserveCount(reserves, token.blockchainType)];
-                case 7:
-                    reservesCount = _b.sent();
-                    i = 0;
-                    _b.label = 8;
-                case 8:
-                    if (!(i < reservesCount)) return [3 /*break*/, 12];
-                    return [4 /*yield*/, exports.getReserveToken(reserves, i, token.blockchainType)];
-                case 9:
-                    reserveToken = _b.sent();
-                    if (!!isReserveToken(reserveToken, token)) return [3 /*break*/, 11];
-                    return [4 /*yield*/, getPathToAnchorByBlockchainId(reserveToken, anchorToken)];
-                case 10:
-                    path = _b.sent();
-                    if (path.length > 0)
-                        return [2 /*return*/, __spreadArrays([getTokenBlockchainId(token), token.blockchainType == 'eos' ? blockchainId : smartToken], path)];
-                    _b.label = 11;
-                case 11:
-                    i++;
-                    return [3 /*break*/, 8];
-                case 12:
-                    _i++;
-                    return [3 /*break*/, 4];
-                case 13: return [2 /*return*/, response];
-            }
-        });
-    });
-}
-exports.getPathToAnchorByBlockchainId = getPathToAnchorByBlockchainId;
 function getShortestPath(sourcePath, targetPath) {
     if (sourcePath.length > 0 && targetPath.length > 0) {
         var i = sourcePath.length - 1;

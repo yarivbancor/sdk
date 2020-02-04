@@ -57,30 +57,14 @@ function init(args) {
     });
 }
 exports.init = init;
-function generateEosPaths() {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, eos_1.buildPathsFile()];
-                case 1:
-                    _a.sent();
-                    return [2 /*return*/];
-            }
-        });
+exports.generatePath = function (sourceToken, targetToken) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, path_generation_1.generatePathByBlockchainIds(sourceToken, targetToken)];
+            case 1: return [2 /*return*/, _a.sent()];
+        }
     });
-}
-exports.generateEosPaths = generateEosPaths;
-function generatePath(sourceToken, targetToken) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, path_generation_1.generatePathByBlockchainIds(sourceToken, targetToken)];
-                case 1: return [2 /*return*/, _a.sent()];
-            }
-        });
-    });
-}
-exports.generatePath = generatePath;
+}); };
 exports.calculateRateFromPaths = function (paths, amount) { return __awaiter(void 0, void 0, void 0, function () {
     var rate;
     return __generator(this, function (_a) {
@@ -156,8 +140,11 @@ function getConverterPairs(path, blockchainType) {
                     i += 2;
                     return [3 /*break*/, 1];
                 case 6:
-                    if (pairs.length == 0 && blockchainType == 'eos' && eos_1.getIsMultiConverter(path[0]))
-                        pairs.push({ converterBlockchainId: path[0], fromToken: path[0], toToken: path[0] });
+                    if (pairs.length == 0 && blockchainType == 'eos' && eos_1.isMultiConverter(path[0])) {
+                        pairs.push({
+                            converterBlockchainId: path[0], fromToken: path[0], toToken: path[0]
+                        });
+                    }
                     return [2 /*return*/, pairs];
             }
         });
@@ -176,7 +163,7 @@ function getRate(sourceToken, targetToken, amount) {
         var paths;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, generatePath(sourceToken, targetToken)];
+                case 0: return [4 /*yield*/, exports.generatePath(sourceToken, targetToken)];
                 case 1:
                     paths = _a.sent();
                     return [4 /*yield*/, exports.getRateByPath(paths, amount)];
@@ -188,9 +175,7 @@ function getRate(sourceToken, targetToken, amount) {
 exports.getRate = getRate;
 exports.default = {
     init: init,
-    generateEosPaths: generateEosPaths,
     getRate: getRate,
-    generatePath: generatePath,
-    getRateByPath: exports.getRateByPath,
-    buildPathsFile: eos_1.buildPathsFile
+    generatePath: exports.generatePath,
+    getRateByPath: exports.getRateByPath
 };

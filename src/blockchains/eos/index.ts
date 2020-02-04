@@ -19,33 +19,14 @@ export function initEOS(endpoint) {
     jsonRpc = new JsonRpc(endpoint, { fetch });
 }
 
-export function getEosjsRpc() {
-    return jsonRpc;
-}
-
 export const getReservesFromCode = async (code, symbol?) => {
     const scope = symbol ? symbol : code;
-    const rpc = getEosjsRpc();
 
-    return await rpc.get_table_rows({
-        json: true,
-        code: code,
-        scope: scope,
-        table: 'reserves',
-        limit: 10
-    });
+    return await getTableRows(code, scope, 'reserves');
 };
 
 export const getConverterSettings = async code => {
-    const rpc = getEosjsRpc();
-
-    return await rpc.get_table_rows({
-        json: true,
-        code: code,
-        scope: code,
-        table: 'settings',
-        limit: 10
-    });
+    return await getTableRows(code, code, 'settings');
 };
 
 export const getConverterFeeFromSettings = async code => {
@@ -53,28 +34,22 @@ export const getConverterFeeFromSettings = async code => {
     return settings.rows[0].fee;
 };
 
-export async function getSmartToken(code) {
-    const rpc = getEosjsRpc();
-
-    return await rpc.get_table_rows({
+export async function getTableRows(code, scope, table) {
+    return await jsonRpc.get_table_rows({
         json: true,
         code: code,
-        scope: code,
-        table: 'settings',
+        scope: scope,
+        table: table,
         limit: 10
     });
 }
 
-export const getSmartTokenSupply = async (account, code) => {
-    const rpc = getEosjsRpc();
+export async function getSmartToken(code) {
+    return await getTableRows(code, code, 'settings');
+}
 
-    return await rpc.get_table_rows({
-        json: true,
-        code: account,
-        scope: code,
-        table: 'stat',
-        limit: 10
-    });
+export const getSmartTokenSupply = async (account, code) => {
+    return await getTableRows(account, code, 'stat');
 };
 
 export const isMultiConverter = blockchhainId => {
@@ -82,15 +57,7 @@ export const isMultiConverter = blockchhainId => {
 };
 
 export const getReserveBalances = async (code, scope, table = 'accounts') => {
-    const rpc = getEosjsRpc();
-
-    return await rpc.get_table_rows({
-        json: true,
-        code: code,
-        scope: scope,
-        table: table,
-        limit: 10
-    });
+    return await getTableRows(code, scope, table);
 };
 
 export const getReserveTokenSymbol = (reserve: Reserve) => {
