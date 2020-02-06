@@ -43,6 +43,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable no-sync */
 /* eslint-disable prefer-reflect */
 var web3_1 = __importDefault(require("web3"));
+var decimal_js_1 = __importDefault(require("decimal.js"));
 var BancorConverterV9_1 = require("./contracts/BancorConverterV9");
 var utils_1 = require("./utils");
 var BancorConverter_1 = require("./contracts/BancorConverter");
@@ -68,19 +69,39 @@ function init(ethereumNodeUrl, ethereumContractRegistryAddress) {
                 case 1:
                     registryBlockchainId = _a.sent();
                     registry = new web3.eth.Contract(registryAbi, registryBlockchainId);
+                    decimal_js_1.default.set({ precision: 100, rounding: decimal_js_1.default.ROUND_DOWN });
                     return [2 /*return*/];
             }
         });
     });
 }
 exports.init = init;
+exports.getEthereumContract = function (contractAbi, blockchainId) {
+    return new web3.eth.Contract(contractAbi, blockchainId);
+};
+exports.callEthereumContractMethod = function (contract, methodPath, methodArgs) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, _b, _c;
+    var _d, _e;
+    return __generator(this, function (_f) {
+        switch (_f.label) {
+            case 0:
+                _b = (_a = console).log;
+                _c = ['callEthereumContractMethod '];
+                return [4 /*yield*/, (_d = contract.methods)[methodPath].apply(_d, methodArgs).call()];
+            case 1:
+                _b.apply(_a, _c.concat([_f.sent()]));
+                return [4 /*yield*/, (_e = contract.methods)[methodPath].apply(_e, methodArgs).call()];
+            case 2: return [2 /*return*/, _f.sent()];
+        }
+    });
+}); };
 exports.getTokenDecimals = function (tokenBlockchainId) { return __awaiter(void 0, void 0, void 0, function () {
     var token;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                token = new web3.eth.Contract(ERC20Token_1.ERC20Token, tokenBlockchainId);
-                return [4 /*yield*/, token.methods.decimals().call()];
+                token = exports.getEthereumContract(ERC20Token_1.ERC20Token, tokenBlockchainId);
+                return [4 /*yield*/, exports.callEthereumContractMethod(token, 'decimals')];
             case 1: return [2 /*return*/, _a.sent()];
         }
     });
@@ -96,16 +117,14 @@ exports.getAmountInTokenWei = function (token, amount) { return __awaiter(void 0
         }
     });
 }); };
-exports.getConversionReturn = function (converterPair, amount, ABI, web3) { return __awaiter(void 0, void 0, void 0, function () {
-    var converterContract, returnAmount;
+exports.getConversionReturn = function (converterPair, amount, ABI) { return __awaiter(void 0, void 0, void 0, function () {
+    var converterContract;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                converterContract = new web3.eth.Contract(ABI, converterPair.converterBlockchainId);
-                return [4 /*yield*/, converterContract.methods.getReturn(converterPair.fromToken, converterPair.toToken, amount).call()];
-            case 1:
-                returnAmount = _a.sent();
-                return [2 /*return*/, returnAmount];
+                converterContract = exports.getEthereumContract(ABI, converterPair.converterBlockchainId);
+                return [4 /*yield*/, exports.callEthereumContractMethod(converterContract, 'getReturn', [converterPair.fromToken, converterPair.toToken, amount])];
+            case 1: return [2 /*return*/, _a.sent()];
         }
     });
 }); };
@@ -124,7 +143,7 @@ function getPathStepRate(converterPair, amount) {
                     _a.label = 3;
                 case 3:
                     _a.trys.push([3, 5, , 9]);
-                    return [4 /*yield*/, exports.getConversionReturn(converterPair, amountInTokenWei, bancorConverter, web3)];
+                    return [4 /*yield*/, exports.getConversionReturn(converterPair, amountInTokenWei, bancorConverter)];
                 case 4:
                     returnAmount = _a.sent();
                     amountInTokenWei = returnAmount['0'];
@@ -132,7 +151,7 @@ function getPathStepRate(converterPair, amount) {
                 case 5:
                     e_1 = _a.sent();
                     if (!e_1.message.includes('insufficient data for uint256')) return [3 /*break*/, 7];
-                    return [4 /*yield*/, exports.getConversionReturn(converterPair, amountInTokenWei, BancorConverterV9_1.BancorConverterV9, web3)];
+                    return [4 /*yield*/, exports.getConversionReturn(converterPair, amountInTokenWei, BancorConverterV9_1.BancorConverterV9)];
                 case 6:
                     amountInTokenWei = _a.sent();
                     return [3 /*break*/, 8];
@@ -149,9 +168,8 @@ exports.getConverterBlockchainId = function (blockchainId) { return __awaiter(vo
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                tokenContract = new web3.eth.Contract(SmartToken_1.SmartToken, blockchainId);
-                console.log('tokenContract ', tokenContract);
-                return [4 /*yield*/, tokenContract.methods.owner().call()];
+                tokenContract = exports.getEthereumContract(SmartToken_1.SmartToken, blockchainId);
+                return [4 /*yield*/, exports.callEthereumContractMethod(tokenContract, 'owner')];
             case 1: return [2 /*return*/, _a.sent()];
         }
     });
@@ -160,18 +178,17 @@ function getReserves(converterBlockchainId) {
     return __awaiter(this, void 0, void 0, function () {
         var reserves;
         return __generator(this, function (_a) {
-            reserves = new web3.eth.Contract(bancorConverter, converterBlockchainId);
-            console.log('reserves ', reserves);
+            reserves = exports.getEthereumContract(bancorConverter, converterBlockchainId);
             return [2 /*return*/, { reserves: reserves }];
         });
     });
 }
 exports.getReserves = getReserves;
-function getReservesCount(reserves) {
+function getReservesCount(converter) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, getTokenCount(reserves, 'connectorTokenCount')];
+                case 0: return [4 /*yield*/, exports.callEthereumContractMethod(converter, 'connectorTokenCount')];
                 case 1: return [2 /*return*/, _a.sent()];
             }
         });
@@ -181,7 +198,7 @@ exports.getReservesCount = getReservesCount;
 exports.getConnectorBlokchainIdByPosition = function (converterContract, i) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, converterContract.methods.connectorTokens(i).call()];
+            case 0: return [4 /*yield*/, exports.callEthereumContractMethod(converterContract, 'connectorTokens', [i])];
             case 1: return [2 /*return*/, _a.sent()];
         }
     });
@@ -204,32 +221,6 @@ function getReserveBlockchainId(converter, position) {
     });
 }
 exports.getReserveBlockchainId = getReserveBlockchainId;
-function getTokenCount(converter, funcName) {
-    return __awaiter(this, void 0, void 0, function () {
-        var response, error_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    response = null;
-                    _a.label = 1;
-                case 1:
-                    _a.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, converter.methods[funcName]().call()];
-                case 2:
-                    response = _a.sent();
-                    return [2 /*return*/, response];
-                case 3:
-                    error_1 = _a.sent();
-                    if (!error_1.message.startsWith('Invalid JSON RPC response')) {
-                        response = 0;
-                        return [2 /*return*/, response];
-                    }
-                    return [3 /*break*/, 4];
-                case 4: return [2 /*return*/];
-            }
-        });
-    });
-}
 function getReserveToken(converterContract, i) {
     return __awaiter(this, void 0, void 0, function () {
         var blockchainId, token;
@@ -253,13 +244,13 @@ function getSmartTokens(token) {
         var isSmartToken, smartTokens, _a;
         return __generator(this, function (_b) {
             switch (_b.label) {
-                case 0: return [4 /*yield*/, registry.methods.isSmartToken(token.blockchainId).call()];
+                case 0: return [4 /*yield*/, exports.callEthereumContractMethod(registry, 'isSmartToken', [token.blockchainId])];
                 case 1:
                     isSmartToken = _b.sent();
                     if (!isSmartToken) return [3 /*break*/, 2];
                     _a = [token.blockchainId];
                     return [3 /*break*/, 4];
-                case 2: return [4 /*yield*/, registry.methods.getConvertibleTokenSmartTokens(token.blockchainId).call()];
+                case 2: return [4 /*yield*/, exports.callEthereumContractMethod(registry, 'getConvertibleTokenSmartTokens', [token.blockchainId])];
                 case 3:
                     _a = _b.sent();
                     _b.label = 4;

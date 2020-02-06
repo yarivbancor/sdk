@@ -2,6 +2,7 @@
 /* eslint-disable no-sync */
 /* eslint-disable prefer-reflect */
 import Web3 from 'web3';
+import Decimal from 'decimal.js';
 import { BancorConverterV9 } from './contracts/BancorConverterV9';
 import { fromWei, toWei } from './utils';
 import { ConversionPathStep, Token } from '../../path_generation';
@@ -22,11 +23,20 @@ export async function init(ethereumNodeUrl, ethereumContractRegistryAddress = '0
     const contractRegistryContract = new web3.eth.Contract(contractRegistry, ethereumContractRegistryAddress);
     const registryBlockchainId = await contractRegistryContract.methods.addressOf(Web3.utils.asciiToHex('BancorConverterRegistry')).call(); // '0x85e27A5718382F32238497e78b4A40DD778ab847'
     registry = new web3.eth.Contract(registryAbi, registryBlockchainId);
+    Decimal.set({ precision: 100, rounding: Decimal.ROUND_DOWN });
 }
 
+export const getEthereumContract = (contractAbi, blockchainId) => {
+    return new web3.eth.Contract(contractAbi, blockchainId);
+};
+
+export const callEthereumContractMethod = async (contract, methodPath, methodArgs?) => {
+    return await contract.methods[methodPath](...methodArgs).call();
+};
+
 export const getTokenDecimals = async tokenBlockchainId => {
-    const token = new web3.eth.Contract(ERC20Token, tokenBlockchainId);
-    return await token.methods.decimals().call();
+    const token = getEthereumContract(ERC20Token, tokenBlockchainId);
+    return await callEthereumContractMethod(token, 'decimals');
 };
 
 export const getAmountInTokenWei = async (token: string, amount: string) => {
@@ -34,10 +44,9 @@ export const getAmountInTokenWei = async (token: string, amount: string) => {
     return toWei(amount, decimals);
 };
 
-export const getConversionReturn = async (converterPair: ConversionPathStep, amount: string, ABI, web3) => {
-    let converterContract = new web3.eth.Contract(ABI, converterPair.converterBlockchainId);
-    const returnAmount = await converterContract.methods.getReturn(converterPair.fromToken, converterPair.toToken, amount).call();
-    return returnAmount;
+export const getConversionReturn = async (converterPair: ConversionPathStep, amount: string, ABI) => {
+    const converterContract = getEthereumContract(ABI, converterPair.converterBlockchainId);
+    return await callEthereumContractMethod(converterContract, 'getReturn', [converterPair.fromToken, converterPair.toToken, amount]);
 };
 
 export async function getPathStepRate(converterPair: ConversionPathStep, amount: string) {
@@ -45,12 +54,12 @@ export async function getPathStepRate(converterPair: ConversionPathStep, amount:
     const tokenBlockchainId = converterPair.toToken;
     const tokenDecimals = await getTokenDecimals(tokenBlockchainId);
     try {
-        const returnAmount = await getConversionReturn(converterPair, amountInTokenWei, bancorConverter, web3);
+        const returnAmount = await getConversionReturn(converterPair, amountInTokenWei, bancorConverter);
         amountInTokenWei = returnAmount['0'];
     }
     catch (e) {
         if (e.message.includes('insufficient data for uint256'))
-            amountInTokenWei = await getConversionReturn(converterPair, amountInTokenWei, BancorConverterV9, web3);
+            amountInTokenWei = await getConversionReturn(converterPair, amountInTokenWei, BancorConverterV9);
 
         else throw (e);
     }
@@ -58,23 +67,21 @@ export async function getPathStepRate(converterPair: ConversionPathStep, amount:
 }
 
 export const getConverterBlockchainId = async blockchainId => {
-    const tokenContract = new web3.eth.Contract(SmartToken, blockchainId);
-    console.log('tokenContract ', tokenContract);
-    return await tokenContract.methods.owner().call();
+    const tokenContract = getEthereumContract(SmartToken, blockchainId);
+    return await callEthereumContractMethod(tokenContract, 'owner');
 };
 
 export async function getReserves(converterBlockchainId) {
-    const reserves = new web3.eth.Contract(bancorConverter, converterBlockchainId);
-    console.log('reserves ', reserves);
+    const reserves = getEthereumContract(bancorConverter, converterBlockchainId);
     return { reserves };
 }
 
-export async function getReservesCount(reserves) {
-    return await getTokenCount(reserves, 'connectorTokenCount');
+export async function getReservesCount(converter) {
+    return await callEthereumContractMethod(converter, 'connectorTokenCount');
 }
 
 export const getConnectorBlokchainIdByPosition = async (converterContract, i) => {
-    return await converterContract.methods.connectorTokens(i).call();
+    return await callEthereumContractMethod(converterContract, 'connectorTokens', [i]);
 };
 
 export async function getReserveBlockchainId(converter, position) {
@@ -87,20 +94,6 @@ export async function getReserveBlockchainId(converter, position) {
     return returnValue;
 }
 
-async function getTokenCount(converter: any, funcName: string) {
-    let response = null;
-    try {
-        response = await converter.methods[funcName]().call();
-        return response;
-    }
-    catch (error) {
-        if (!error.message.startsWith('Invalid JSON RPC response')) {
-            response = 0;
-            return response;
-        }
-    }
-}
-
 export async function getReserveToken(converterContract, i) {
     const blockchainId = await getConnectorBlokchainIdByPosition(converterContract, i);
     const token: Token = {
@@ -111,7 +104,7 @@ export async function getReserveToken(converterContract, i) {
 }
 
 export async function getSmartTokens(token: Token) {
-    const isSmartToken = await registry.methods.isSmartToken(token.blockchainId).call();
-    const smartTokens = isSmartToken ? [token.blockchainId] : await registry.methods.getConvertibleTokenSmartTokens(token.blockchainId).call();
+    const isSmartToken = await callEthereumContractMethod(registry, 'isSmartToken', [token.blockchainId]);
+    const smartTokens = isSmartToken ? [token.blockchainId] : await callEthereumContractMethod(registry, 'getConvertibleTokenSmartTokens', [token.blockchainId]);
     return smartTokens;
 }
