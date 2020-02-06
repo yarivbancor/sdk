@@ -16,7 +16,7 @@ interface Reserve {
 let pathJson = Paths;
 let jsonRpc;
 
-export function initEOS(endpoint) {
+export function init(endpoint) {
     jsonRpc = new JsonRpc(endpoint, { fetch });
 }
 
@@ -145,7 +145,7 @@ export async function getPathStepRate(pair: ConversionPathStep, amount: string) 
         };
     });
 
-    Decimal.set({precision: 100, rounding: Decimal.ROUND_DOWN});
+    Decimal.set({ precision: 100, rounding: Decimal.ROUND_DOWN });
 
     if (isConversionFromSmartToken) {
         const token = pathJson.smartTokens[fromTokenBlockchainId] || pathJson.convertibleTokens[fromTokenBlockchainId];

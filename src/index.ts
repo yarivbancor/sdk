@@ -1,5 +1,5 @@
 import { init as initEthereum, getConverterBlockchainId, getPathStepRate as getEthPathStepRate } from './blockchains/ethereum/index';
-import { initEOS, getPathStepRate as getEOSPathStepRate, isMultiConverter } from './blockchains/eos';
+import { init as initEOS, getPathStepRate as getEOSPathStepRate, isMultiConverter } from './blockchains/eos';
 import { Token, generatePathByBlockchainIds, ConversionPaths, ConversionPathStep, BlockchainType, ConversionToken, Contract } from './path_generation';
 import { run as retrieve_contract_version } from './blockchains/ethereum/retrieve_contract_version';
 import { run as fetch_conversion_events } from './blockchains/ethereum/fetch_conversion_events';
