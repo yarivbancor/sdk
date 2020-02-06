@@ -51,10 +51,6 @@ function initEOS(endpoint) {
     jsonRpc = new eosjs_1.JsonRpc(endpoint, { fetch: node_fetch_1.default });
 }
 exports.initEOS = initEOS;
-function getEosjsRpc() {
-    return jsonRpc;
-}
-exports.getEosjsRpc = getEosjsRpc;
 exports.getReservesFromCode = function (code, symbol) { return __awaiter(void 0, void 0, void 0, function () {
     var scope;
     return __generator(this, function (_a) {
@@ -96,9 +92,7 @@ function getTableRows(code, scope, table) {
                         table: table,
                         limit: 10
                     })];
-                case 1: 
-                // const rpc = getEosjsRpc();
-                return [2 /*return*/, _a.sent()];
+                case 1: return [2 /*return*/, _a.sent()];
             }
         });
     });

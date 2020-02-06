@@ -150,6 +150,7 @@ exports.getConverterBlockchainId = function (blockchainId) { return __awaiter(vo
         switch (_a.label) {
             case 0:
                 tokenContract = new web3.eth.Contract(SmartToken_1.SmartToken, blockchainId);
+                console.log('tokenContract ', tokenContract);
                 return [4 /*yield*/, tokenContract.methods.owner().call()];
             case 1: return [2 /*return*/, _a.sent()];
         }
@@ -160,6 +161,7 @@ function getReserves(converterBlockchainId) {
         var reserves;
         return __generator(this, function (_a) {
             reserves = new web3.eth.Contract(bancorConverter, converterBlockchainId);
+            console.log('reserves ', reserves);
             return [2 /*return*/, { reserves: reserves }];
         });
     });
