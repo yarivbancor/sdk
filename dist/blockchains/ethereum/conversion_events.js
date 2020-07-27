@@ -236,3 +236,4 @@ function get(web3, decimals, token, fromBlock, toBlock) {
     });
 }
 exports.get = get;
+//# sourceMappingURL=conversion_events.js.map

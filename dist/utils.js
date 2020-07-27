@@ -59,12 +59,12 @@ var Utils = /** @class */ (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     /**
-    * returns the version number of a converter in the bancor network
-    *
-    * @param converter    converter
-    *
-    * @returns  converter version
-    */
+     * returns the version number of a converter in the bancor network
+     *
+     * @param converter    converter
+     *
+     * @returns  converter version
+     */
     Utils.prototype.getConverterVersion = function (converter) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -78,3 +78,4 @@ var Utils = /** @class */ (function (_super) {
     return Utils;
 }(sdk_module_1.SDKModule));
 exports.Utils = Utils;
+//# sourceMappingURL=utils.js.map

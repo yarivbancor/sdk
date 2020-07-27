@@ -4,12 +4,13 @@ export declare class Core {
     create(settings: Settings): Promise<void>;
     destroy(): Promise<void>;
     refresh(): Promise<void>;
+    getPaths(sourceToken: Token, targetToken: Token, amount?: string): Promise<Token[][]>;
     getPathAndRate(sourceToken: Token, targetToken: Token, amount?: string): Promise<{
         path: Token[];
         rate: string;
     }>;
     getRateByPath(path: Token[], amount?: string): Promise<string>;
-    private getPaths;
+    private getPathsFunction;
     private getRates;
     private static getBest;
     private static betterRate;

@@ -43,18 +43,6 @@ export declare const BancorConverterRegistry: {
     stateMutability: string;
     type: string;
 }[];
-export declare const ERC20Token: {
-    constant: boolean;
-    inputs: any[];
-    name: string;
-    outputs: {
-        name: string;
-        type: string;
-    }[];
-    payable: boolean;
-    stateMutability: string;
-    type: string;
-}[];
 export declare const MulticallContract: {
     constant: boolean;
     inputs: ({
@@ -92,3 +80,117 @@ export declare const MulticallContract: {
     stateMutability: string;
     type: string;
 }[];
+export declare const ConverterBase: ({
+    constant: boolean;
+    inputs: {
+        name: string;
+        type: string;
+    }[];
+    name: string;
+    outputs: {
+        name: string;
+        type: string;
+    }[];
+    payable: boolean;
+    stateMutability: string;
+    type: string;
+    anonymous?: undefined;
+} | {
+    inputs: {
+        name: string;
+        type: string;
+    }[];
+    payable: boolean;
+    stateMutability: string;
+    type: string;
+    constant?: undefined;
+    name?: undefined;
+    outputs?: undefined;
+    anonymous?: undefined;
+} | {
+    payable: boolean;
+    stateMutability: string;
+    type: string;
+    constant?: undefined;
+    inputs?: undefined;
+    name?: undefined;
+    outputs?: undefined;
+    anonymous?: undefined;
+} | {
+    anonymous: boolean;
+    inputs: {
+        indexed: boolean;
+        name: string;
+        type: string;
+    }[];
+    name: string;
+    type: string;
+    constant?: undefined;
+    outputs?: undefined;
+    payable?: undefined;
+    stateMutability?: undefined;
+})[];
+export declare const IConverterAnchor: ({
+    constant: boolean;
+    inputs: {
+        name: string;
+        type: string;
+    }[];
+    name: string;
+    outputs: any[];
+    payable: boolean;
+    stateMutability: string;
+    type: string;
+} | {
+    constant: boolean;
+    inputs: any[];
+    name: string;
+    outputs: {
+        name: string;
+        type: string;
+    }[];
+    payable: boolean;
+    stateMutability: string;
+    type: string;
+})[];
+export declare const ERC20Token: ({
+    constant: boolean;
+    inputs: {
+        name: string;
+        type: string;
+    }[];
+    name: string;
+    outputs: {
+        name: string;
+        type: string;
+    }[];
+    payable: boolean;
+    stateMutability: string;
+    type: string;
+    anonymous?: undefined;
+} | {
+    inputs: {
+        name: string;
+        type: string;
+    }[];
+    payable: boolean;
+    stateMutability: string;
+    type: string;
+    constant?: undefined;
+    name?: undefined;
+    outputs?: undefined;
+    anonymous?: undefined;
+} | {
+    anonymous: boolean;
+    inputs: {
+        indexed: boolean;
+        name: string;
+        type: string;
+    }[];
+    name: string;
+    type: string;
+    constant?: undefined;
+    outputs?: undefined;
+    payable?: undefined;
+    stateMutability?: undefined;
+})[];

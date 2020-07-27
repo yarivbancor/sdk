@@ -40,6 +40,7 @@ var core_1 = require("./core");
 var history_1 = require("./history");
 var pricing_1 = require("./pricing");
 var utils_1 = require("./utils");
+var converters_1 = require("./converters");
 /**
  * Main SDK object, should be instantiated using the `create` static method
  */
@@ -51,17 +52,19 @@ var SDK = /** @class */ (function () {
         this.pricing = null;
         /** Utils module */
         this.utils = null;
+        /** Utils module */
+        this.converters = null;
         /** @internal */
         this._core = new core_1.Core();
     }
     /**
-    * creates and initializes a new SDK object
-    * should be called as the first step before using the SDK
-    *
-    * @param settings   initialization settings
-    *
-    * @returns  new SDK object
-    */
+     * creates and initializes a new SDK object
+     * should be called as the first step before using the SDK
+     *
+     * @param settings   initialization settings
+     *
+     * @returns  new SDK object
+     */
     SDK.create = function (settings) {
         return __awaiter(this, void 0, void 0, function () {
             var sdk;
@@ -75,17 +78,18 @@ var SDK = /** @class */ (function () {
                         sdk.history = new history_1.History(sdk._core);
                         sdk.pricing = new pricing_1.Pricing(sdk._core);
                         sdk.utils = new utils_1.Utils(sdk._core);
+                        sdk.converters = new converters_1.Converters(sdk._core);
                         return [2 /*return*/, sdk];
                 }
             });
         });
     };
     /**
-    * cleans up and destroys an existing SDK object
-    * should be called as the last step after the SDK work is complete to free up resources
-    *
-    * @param sdk   sdk object
-    */
+     * cleans up and destroys an existing SDK object
+     * should be called as the last step after the SDK work is complete to free up resources
+     *
+     * @param sdk   sdk object
+     */
     SDK.destroy = function (sdk) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -94,6 +98,7 @@ var SDK = /** @class */ (function () {
                         sdk.history = null;
                         sdk.pricing = null;
                         sdk.utils = null;
+                        sdk.converters = null;
                         return [4 /*yield*/, sdk._core.destroy()];
                     case 1:
                         _a.sent();
@@ -103,9 +108,9 @@ var SDK = /** @class */ (function () {
         });
     };
     /**
-    * refreshes the local cache with data from the converter registry
-    * should be called periodically to support new pools
-    */
+     * refreshes the local cache with data from the converter registry
+     * should be called periodically to support new pools
+     */
     SDK.prototype.refresh = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -121,3 +126,4 @@ var SDK = /** @class */ (function () {
     return SDK;
 }());
 exports.SDK = SDK;
+//# sourceMappingURL=index.js.map
