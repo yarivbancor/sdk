@@ -2,21 +2,16 @@
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
-    "lib": [
-      "es6",
-      "dom",
-      "es2015.promise"
-    ],
+    "lib": ["es6", "dom", "es2015.promise"],
     "declaration": true,
     "outDir": "dist",
     "strict": false,
     "moduleResolution": "node",
     "noImplicitAny": false,
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "sourceMap": true
   },
-  "include": [
-    "./src/*"
-  ],
+  "include": ["./src/*"],
   "exclude": []
 }

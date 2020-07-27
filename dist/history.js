@@ -99,3 +99,4 @@ var History = /** @class */ (function (_super) {
     return History;
 }(sdk_module_1.SDKModule));
 exports.History = History;
+//# sourceMappingURL=history.js.map

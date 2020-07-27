@@ -50,71 +50,26 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var sdk_module_1 = require("./sdk_module");
-/**
- * The Pricing module provides access to pricing and rates logic for tokens in the bancor network
- */
-var Pricing = /** @class */ (function (_super) {
-    __extends(Pricing, _super);
-    function Pricing() {
+var Converters = /** @class */ (function (_super) {
+    __extends(Converters, _super);
+    function Converters() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    /**
-     * returns the best conversion path and rate for a given pair of tokens in the bancor network
-     *
-     * @param sourceToken    source token
-     * @param targetToken    target token
-     * @param amount         input amount
-     *
-     * @returns  the best path and rate between the source token and the target token
-     */
-    Pricing.prototype.getPathAndRate = function (sourceToken, targetToken, amount) {
-        if (amount === void 0) { amount = '1'; }
+    Converters.prototype.getAnchors = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.core.getPathAndRate(sourceToken, targetToken, amount)];
-                    case 1: return [2 /*return*/, _a.sent()];
-                }
+                return [2 /*return*/, this.core.blockchains.ethereum.getAnchors()];
             });
         });
     };
-    /**
-     * returns the rate for a given conversion path in the bancor network
-     *
-     * @param path    conversion path
-     * @param amount  input amount
-     *
-     * @returns  output amount for a conversion on the given path
-     */
-    Pricing.prototype.getRateByPath = function (path, amount) {
-        if (amount === void 0) { amount = '1'; }
+    Converters.prototype.getConvertibleTokens = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.core.getRateByPath(path, amount)];
-                    case 1: return [2 /*return*/, _a.sent()];
-                }
+                return [2 /*return*/, this.core.blockchains.ethereum.getConvertibleTokens()];
             });
         });
     };
-    /**
-     *
-     * @param sourceToken
-     * @param targetToken
-     * @param amount
-     */
-    Pricing.prototype.getPaths = function (sourceToken, targetToken, amount) {
-        if (amount === void 0) { amount = '1'; }
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.core.getPaths(sourceToken, targetToken, amount)];
-                    case 1: return [2 /*return*/, _a.sent()];
-                }
-            });
-        });
-    };
-    return Pricing;
+    return Converters;
 }(sdk_module_1.SDKModule));
-exports.Pricing = Pricing;
-//# sourceMappingURL=pricing.js.map
+exports.Converters = Converters;
+//# sourceMappingURL=converters.js.map

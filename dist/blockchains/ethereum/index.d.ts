@@ -1,5 +1,5 @@
-import Web3 from 'web3';
-import { Blockchain, Converter, ConversionEvent, Token } from '../../types';
+import Web3 from "web3";
+import { Blockchain, Converter, ConversionEvent, Token } from "../../types";
 export declare class Ethereum implements Blockchain {
     web3: Web3;
     networkType: string;
@@ -19,6 +19,8 @@ export declare class Ethereum implements Blockchain {
     getConverterVersion(converter: Converter): Promise<string>;
     getConversionEvents(token: Token, fromBlock: number, toBlock: number): Promise<ConversionEvent[]>;
     getConversionEventsByTimestamp(token: Token, fromTimestamp: number, toTimestamp: number): Promise<ConversionEvent[]>;
+    getAnchors(): Promise<string[]>;
+    getConvertibleTokens(): Promise<string[]>;
     getAllPathsFunc(sourceToken: string, targetToken: string): string[][];
     getSomePathsFunc(sourceToken: string, targetToken: string): string[][];
     private static getNormalizedToken;

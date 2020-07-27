@@ -122,3 +122,4 @@ function getBlock(web3, number) {
     });
 }
 var blocks = {};
+//# sourceMappingURL=timestamp_to_block_number.js.map

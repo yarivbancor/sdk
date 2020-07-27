@@ -8,3 +8,4 @@ var BlockchainType;
     BlockchainType["Ethereum"] = "ethereum";
     BlockchainType["EOS"] = "eos";
 })(BlockchainType = exports.BlockchainType || (exports.BlockchainType = {}));
+//# sourceMappingURL=types.js.map

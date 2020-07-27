@@ -54,34 +54,50 @@ var legacy_converters_1 = __importDefault(require("./legacy_converters"));
 var anchorToken = {
     blockchainType: types_1.BlockchainType.EOS,
     blockchainId: 'bntbntbntbnt',
-    symbol: 'BNT'
+    symbol: 'BNT',
 };
 var EOS = /** @class */ (function () {
     function EOS() {
     }
     EOS.create = function (nodeEndpoint) {
         return __awaiter(this, void 0, void 0, function () {
-            var eos;
+            var eos, converters;
             return __generator(this, function (_a) {
-                eos = new EOS();
-                eos.jsonRpc = new eosjs_1.JsonRpc(nodeEndpoint, { fetch: node_fetch_1.default });
-                return [2 /*return*/, eos];
+                switch (_a.label) {
+                    case 0:
+                        eos = new EOS();
+                        eos.jsonRpc = new eosjs_1.JsonRpc(nodeEndpoint, { fetch: node_fetch_1.default });
+                        // cache converters list
+                        eos.converters = legacy_converters_1.default;
+                        if (!(process.env['NODE_ENV'] !== 'test')) return [3 /*break*/, 2];
+                        return [4 /*yield*/, eos.getConverters()];
+                    case 1:
+                        converters = _a.sent();
+                        converters.map(function (c) {
+                            var _a;
+                            var currency = c.currency.split(',')[1];
+                            var key = "smarttokens1:" + currency;
+                            eos.converters[key] = {
+                                smartToken: (_a = {}, _a[key] = currency, _a),
+                            };
+                            eos.converters[key]['reserves'] = {};
+                            c.reserve_balances.map(function (r) { return (eos.converters[key]['reserves']["" + r.value.contract] = r.key); });
+                        });
+                        _a.label = 2;
+                    case 2: return [2 /*return*/, eos];
+                }
             });
         });
     };
     EOS.destroy = function (eos) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                return [2 /*return*/];
-            });
-        });
+        return __awaiter(this, void 0, void 0, function () { return __generator(this, function (_a) {
+            return [2 /*return*/];
+        }); });
     };
     EOS.prototype.refresh = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                return [2 /*return*/];
-            });
-        });
+        return __awaiter(this, void 0, void 0, function () { return __generator(this, function (_a) {
+            return [2 /*return*/];
+        }); });
     };
     EOS.prototype.getAnchorToken = function () {
         return anchorToken;
@@ -158,6 +174,25 @@ var EOS = /** @class */ (function () {
             });
         });
     };
+    EOS.prototype.getConverters = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var res;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.jsonRpc.get_table_rows({
+                            json: true,
+                            code: 'bancorcnvrtr',
+                            scope: 'bancorcnvrtr',
+                            table: 'converter.v2',
+                            limit: 5000,
+                        })];
+                    case 1:
+                        res = _a.sent();
+                        return [2 /*return*/, res.rows];
+                }
+            });
+        });
+    };
     EOS.prototype.getConverterSettings = function (converter) {
         return __awaiter(this, void 0, void 0, function () {
             var res;
@@ -168,7 +203,7 @@ var EOS = /** @class */ (function () {
                             code: converter.blockchainId,
                             scope: converter.blockchainId,
                             table: 'settings',
-                            limit: 1
+                            limit: 1,
                         })];
                     case 1:
                         res = _a.sent();
@@ -177,7 +212,6 @@ var EOS = /** @class */ (function () {
             });
         });
     };
-    ;
     EOS.prototype.getSmartTokenStat = function (smartToken) {
         return __awaiter(this, void 0, void 0, function () {
             var stat;
@@ -188,7 +222,7 @@ var EOS = /** @class */ (function () {
                             code: smartToken.blockchainId,
                             scope: smartToken.symbol,
                             table: 'stat',
-                            limit: 1
+                            limit: 1,
                         })];
                     case 1:
                         stat = _a.sent();
@@ -197,7 +231,6 @@ var EOS = /** @class */ (function () {
             });
         });
     };
-    ;
     EOS.prototype.getReserves = function (converter) {
         return __awaiter(this, void 0, void 0, function () {
             var res;
@@ -208,7 +241,7 @@ var EOS = /** @class */ (function () {
                             code: converter.blockchainId,
                             scope: converter.blockchainId,
                             table: 'reserves',
-                            limit: 10
+                            limit: 10,
                         })];
                     case 1:
                         res = _a.sent();
@@ -217,7 +250,6 @@ var EOS = /** @class */ (function () {
             });
         });
     };
-    ;
     EOS.prototype.getReserveBalance = function (converter, reserveToken) {
         return __awaiter(this, void 0, void 0, function () {
             var res;
@@ -228,7 +260,7 @@ var EOS = /** @class */ (function () {
                             code: reserveToken.blockchainId,
                             scope: converter.blockchainId,
                             table: 'accounts',
-                            limit: 1
+                            limit: 1,
                         })];
                     case 1:
                         res = _a.sent();
@@ -237,7 +269,6 @@ var EOS = /** @class */ (function () {
             });
         });
     };
-    ;
     EOS.prototype.getConversionRate = function (smartToken, sourceToken, targetToken, amount) {
         return __awaiter(this, void 0, void 0, function () {
             var smartTokenStat, converterBlockchainId, converter, conversionSettings, conversionFee, reserves, magnitude, targetDecimals, returnAmount, supply, reserveBalance, reserveWeight, supply, reserveBalance, reserveWeight, sourceReserveBalance, sourceReserveWeight, targetReserveBalance, targetReserveWeight;
@@ -252,7 +283,7 @@ var EOS = /** @class */ (function () {
                         converter = {
                             blockchainType: types_1.BlockchainType.EOS,
                             blockchainId: converterBlockchainId,
-                            symbol: smartToken.symbol
+                            symbol: smartToken.symbol,
                         };
                         return [4 /*yield*/, this.getConverterSettings(converter)];
                     case 3:
@@ -269,8 +300,8 @@ var EOS = /** @class */ (function () {
                         reserveBalance = _a.sent();
                         reserveWeight = EOS.getReserve(reserves, targetToken).ratio;
                         targetDecimals = EOS.getDecimals(reserveBalance);
-                        returnAmount = helpers.saleRate(supply, reserveBalance, reserveWeight, amount);
-                        return [3 /*break*/, 12];
+                        returnAmount = helpers.calculateSaleReturn(supply, reserveBalance, reserveWeight, amount);
+                        return [3 /*break*/, 11];
                     case 6:
                         if (!helpers.isTokenEqual(targetToken, smartToken)) return [3 /*break*/, 8];
                         supply = EOS.getBalance(smartTokenStat.supply);
@@ -279,8 +310,8 @@ var EOS = /** @class */ (function () {
                         reserveBalance = _a.sent();
                         reserveWeight = EOS.getReserve(reserves, sourceToken).ratio;
                         targetDecimals = EOS.getDecimals(supply);
-                        returnAmount = helpers.purchaseRate(supply, reserveBalance, reserveWeight, amount);
-                        return [3 /*break*/, 12];
+                        returnAmount = helpers.calculatePurchaseReturn(supply, reserveBalance, reserveWeight, amount);
+                        return [3 /*break*/, 11];
                     case 8: return [4 /*yield*/, this.getReserveBalance(converter, sourceToken)];
                     case 9:
                         sourceReserveBalance = _a.sent();
@@ -290,13 +321,10 @@ var EOS = /** @class */ (function () {
                         targetReserveBalance = _a.sent();
                         targetReserveWeight = EOS.getReserve(reserves, targetToken).ratio;
                         targetDecimals = EOS.getDecimals(targetReserveBalance);
-                        returnAmount = helpers.crossReserveRate(sourceReserveBalance, sourceReserveWeight, targetReserveBalance, targetReserveWeight, amount);
-                        return [4 /*yield*/, this.getConverterVersion(converter)];
-                    case 11:
-                        if ((_a.sent()) == '1.0')
-                            magnitude = 2;
-                        _a.label = 12;
-                    case 12: return [2 /*return*/, helpers.toDecimalPlaces(helpers.getFinalAmount(returnAmount, conversionFee, magnitude), targetDecimals)];
+                        returnAmount = helpers.calculateCrossReserveReturn(sourceReserveBalance, sourceReserveWeight, targetReserveBalance, targetReserveWeight, amount);
+                        magnitude = 2;
+                        _a.label = 11;
+                    case 11: return [2 /*return*/, helpers.toDecimalPlaces(helpers.getFinalAmount(returnAmount, conversionFee, magnitude), targetDecimals)];
                 }
             });
         });
@@ -307,8 +335,8 @@ var EOS = /** @class */ (function () {
             return __generator(this, function (_a) {
                 smartTokens = [];
                 // search in legacy converters
-                for (converterAccount in legacy_converters_1.default) {
-                    converter = legacy_converters_1.default[converterAccount];
+                for (converterAccount in this.converters) {
+                    converter = this.converters[converterAccount];
                     // check if the token is the converter smart token
                     if (converter.smartToken[token.blockchainId] == token.symbol)
                         smartTokens.push(token);
@@ -319,7 +347,7 @@ var EOS = /** @class */ (function () {
                             smartTokens.push({
                                 blockchainType: types_1.BlockchainType.EOS,
                                 blockchainId: smartTokenAccount,
-                                symbol: converter.smartToken[smartTokenAccount]
+                                symbol: converter.smartToken[smartTokenAccount],
                             });
                         }
                     }
@@ -361,7 +389,7 @@ var EOS = /** @class */ (function () {
                 path.push(targetPath[n]);
             var length_1 = 0;
             for (var p = 0; p < path.length; p += 1) {
-                for (var q = p + 2; q < path.length - p % 2; q += 2) {
+                for (var q = p + 2; q < path.length - (p % 2); q += 2) {
                     if (helpers.isTokenEqual(path[p], path[q]))
                         p = q;
                 }
@@ -373,8 +401,7 @@ var EOS = /** @class */ (function () {
     };
     EOS.getReserve = function (reserves, reserveToken) {
         return reserves.filter(function (reserve) {
-            return reserve.contract == reserveToken.blockchainId &&
-                EOS.getSymbol(reserve.currency) == reserveToken.symbol;
+            return reserve.contract == reserveToken.blockchainId && EOS.getSymbol(reserve.currency) == reserveToken.symbol;
         })[0];
     };
     EOS.getBalance = function (asset) {
@@ -389,3 +416,4 @@ var EOS = /** @class */ (function () {
     return EOS;
 }());
 exports.EOS = EOS;
+//# sourceMappingURL=index.js.map
